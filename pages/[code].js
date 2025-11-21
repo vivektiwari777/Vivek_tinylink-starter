@@ -1,0 +1,22 @@
+import { prisma } from '../lib/prisma';
+
+export async function getServerSideProps(context) {
+  const code = context.params.code;
+  const link = await prisma.link.findUnique({ where: { code } });
+  if (!link) {
+    return { notFound: true };
+  }
+  // increment click and update time
+  await prisma.link.update({
+    where: { code },
+    data: { clicks: link.clicks + 1, lastClicked: new Date() }
+  });
+  return {
+    redirect: {
+      destination: link.url,
+      permanent: false,
+    }
+  };
+}
+
+export default function RedirectPage(){ return null; }
